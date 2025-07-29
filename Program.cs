@@ -26,7 +26,6 @@ namespace Maths_Game
     public static void Main(string[] args)
     {
       Console.Title = "Maths Game";
-      Console.WriteLine("Maths Game");
       Console.WriteLine("==========");
       Console.WriteLine();
 
@@ -80,6 +79,7 @@ namespace Maths_Game
     private static void ShowMainMenu()
     {
       Console.Clear();
+      Console.ForegroundColor = ConsoleColor.Cyan;
       Console.WriteLine(new string('=', 60));
       Console.WriteLine("                    🧮 MATH GAME 🧮");
       Console.WriteLine(new string('=', 60));
@@ -94,13 +94,17 @@ namespace Maths_Game
       Console.WriteLine("  5. [H]istory       📊");
       Console.WriteLine("  6. [Q]uit          🚪");
       Console.WriteLine();
-      Console.WriteLine(new string('=', 60));
+      Console.WriteLine(new string('=', 70));
+      Console.ResetColor();
     }
 
     private static string GetUserChoice()
     {
+      Console.ForegroundColor = ConsoleColor.White;
       Console.Write("Enter your choice (1-6 or letter):");
+      Console.ForegroundColor = ConsoleColor.Green;
       string input = ReadNonNullLine();
+      Console.ResetColor();
 
       return string.IsNullOrWhiteSpace(input) ? "" : input.Trim();
     }
@@ -108,10 +112,12 @@ namespace Maths_Game
     private static void PlayGame(string operationType, char operatorSymbol)
     {
       Console.Clear();
+      Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine(new string('=', 60));
       Console.WriteLine($"                    {operationType.ToUpper()} ");
       Console.WriteLine(new string('=', 60));
       Console.WriteLine();
+      Console.ResetColor();
 
       int numberOfQuestions = GetNumberOfQuestions();
       if (numberOfQuestions == 0) return; // If numberOfQuestions is 0, skip the game. That is, User chose to go back to main menu.
@@ -243,8 +249,8 @@ namespace Maths_Game
 
         case '/':
           // * Generate division that results in integers only
-          answer = random.Next(1, 101);    // Result between 1 - 100
-          num2 = random.Next(1, 101);     // Division between 1 and 100
+          answer = random.Next(1, 11);    // Result between 1 - 100
+          num2 = random.Next(1, 11);     // Division between 1 and 100
           num1 = answer * num2;          // Ensures integer division
           break;
 
