@@ -346,10 +346,11 @@ namespace Maths_Game
         totalQuestions += game.QuestionsAsked;
         totalCorrect += game.Score;
 
-        if (operationCounts.ContainsKey(game.Operation))
-          operationCounts[game.Operation]++;
+        string opKey = game.Operation ?? "Unknown";
+        if (operationCounts.ContainsKey(opKey))
+          operationCounts[opKey]++;
         else
-          operationCounts[game.Operation] = 1;
+          operationCounts[opKey] = 1;
       }
 
       double overallAccuracy = (double)totalCorrect / totalQuestions * 100;
