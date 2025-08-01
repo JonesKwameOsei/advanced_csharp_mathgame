@@ -9,11 +9,13 @@ public class Menu
 {
   private readonly GameEngine _gameEngine;
   private readonly Helpers _helpers;
+  private readonly UserManager _userManager;
 
-  public class Menu()
+  public Menu()
   {
     _gameEngine = new GameEngine();
     _helpers = new Helpers();
+    _userManager = new UserManager();
   }
 
   public void ShowMainMenu()
@@ -30,7 +32,7 @@ public class Menu
       }
       catch (Exception ex)
       {
-        _helpers.DisplatError($"An unexpected error occurred: {ex.Message}");
+        _helpers.DisplayError($"An unexpected error occurred: {ex.Message}");
         _helpers.PauseForUser();
       }
     }
@@ -44,14 +46,16 @@ public class Menu
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(new string('═', 70));
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine("                    🧮 MATH GAME 🧮");
+    Console.WriteLine("                     🧮 MATH GAME 🧮");
+    Console.WriteLine();
+    Console.WriteLine("                  Welcome to the Math Game");
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine(new string('═', 70));
     Console.ResetColor();
 
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("Select the game you want to play");
+    Console.WriteLine("Select the game you want to play:");
     Console.ResetColor();
     Console.WriteLine();
 
@@ -74,7 +78,8 @@ public class Menu
   private void DisplayMenuOption(string number, string letter, string operation, string icon, ConsoleColor color)
   {
     Console.ForegroundColor = ConsoleColor.White;
-    Console.Write("  ");
+    // Console.Write("  ");
+    Console.WriteLine();
     Console.ForegroundColor = color;
     Console.WriteLine($"{number}. [{letter}]");
     Console.ForegroundColor = ConsoleColor.White;

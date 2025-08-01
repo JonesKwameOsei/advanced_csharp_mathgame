@@ -20,7 +20,7 @@ public class GameSession
 {
   public string OperationType { get; set; } = string.Empty;
   public char OperatorSymbol { get; set; }
-  public int numberOfQuestions { get; set; }
+  public int NumberOfQuestions { get; set; }
   public int CurrentScore { get; set; }
   public List<string> GameLog { get; set; } = [];
   public ConsoleColor ThemeColor { get; set; }
