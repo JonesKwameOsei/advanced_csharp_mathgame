@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using Maths_Game.Models;
 
 namespace Maths_Game;
@@ -9,14 +10,20 @@ public class GameEngine
   private static readonly List<GameResult> gameHistory = new();
   private readonly Random random = new();
   private readonly Helpers helper = new Helpers();
+  private readonly DifficultyManager difficultyManager = new DifficultyManager();
 
   public void StartGame(String OperationType, char OperatorSymbol, ConsoleColor themeColor)
   {
+    DifficultyLevel difficulty = difficultyManager.SelectDifficulty();
+    if ((int)difficulty == 0) return; // User chose to go back
+
+
     GameSession session = new GameSession
     {
       OperationType = OperationType,
       OperatorSymbol = OperatorSymbol,
-      ThemeColor = themeColor
+      ThemeColor = themeColor,
+      Difficulty = difficulty
     };
 
     DisplayGameHeader(session);
@@ -38,6 +45,8 @@ public class GameEngine
     Console.WriteLine(new string('═', 70));
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine($"                    {session.OperationType.ToUpper()} PRACTICE");
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.WriteLine($"                    {difficultyManager.GetDifficultyDescription(session.Difficulty)}");
     Console.ForegroundColor = session.ThemeColor;
     Console.WriteLine(new string('═', 70));
     Console.ResetColor();
@@ -47,7 +56,7 @@ public class GameEngine
   private void PlayGameSession(GameSession session)
   {
     Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine($"Starting {session.OperationType} practice with {session.NumberOfQuestions} questions...\n");
+    Console.WriteLine($"Starting {session.OperationType} practice ({session.Difficulty} level) with {session.NumberOfQuestions} questions...\n");
     Console.ResetColor();
 
     for (int i = 1; i <= session.NumberOfQuestions; i++)
@@ -72,7 +81,8 @@ public class GameEngine
 
   private bool ProcessQuestion(GameSession session, int questionNumber)
   {
-    var (num1, num2, correctAnswer) = GenerateQuestion(session.OperatorSymbol);
+    var (num1, num2, correctAnswer) = difficultyManager.GenerateQuestionByDifficulty(
+                session.OperatorSymbol, session.Difficulty, random);
 
     // Display question with theme color
     Console.ForegroundColor = session.ThemeColor;
@@ -116,41 +126,41 @@ public class GameEngine
     Console.ResetColor();
   }
 
-  private (int, int, int) GenerateQuestion(char operation)
-  {
-    int num1, num2, answer;
+  // private (int, int, int) GenerateQuestion(char operation)
+  // {
+  //   int num1, num2, answer;
 
-    switch (operation)
-    {
-      case '+':
-        num1 = random.Next(1, 101);
-        num2 = random.Next(1, 101);
-        answer = num1 + num2;
-        break;
+  //   switch (operation)
+  //   {
+  //     case '+':
+  //       num1 = random.Next(1, 101);
+  //       num2 = random.Next(1, 101);
+  //       answer = num1 + num2;
+  //       break;
 
-      case '-':
-        num1 = random.Next(1, 101);
-        num2 = random.Next(1, num1 + 1); // prevent negative results
-        answer = num1 - num2;
-        break;
+  //     case '-':
+  //       num1 = random.Next(1, 101);
+  //       num2 = random.Next(1, num1 + 1); // prevent negative results
+  //       answer = num1 - num2;
+  //       break;
 
-      case '*':
-        num1 = random.Next(1, 13);
-        num2 = random.Next(1, 13);
-        answer = num1 * num2;
-        break;
+  //     case '*':
+  //       num1 = random.Next(1, 13);
+  //       num2 = random.Next(1, 13);
+  //       answer = num1 * num2;
+  //       break;
 
-      case '/':
-        answer = random.Next(1, 11);
-        num2 = random.Next(1, 11);
-        num1 = answer * num2;
-        break;
-      default:
-        throw new ArgumentException("Invalid operation");
-    }
+  //     case '/':
+  //       answer = random.Next(1, 11);
+  //       num2 = random.Next(1, 11);
+  //       num1 = answer * num2;
+  //       break;
+  //     default:
+  //       throw new ArgumentException("Invalid operation");
+  //   }
 
-    return (num1, num2, answer);
-  }
+  //   return (num1, num2, answer);
+  // }
 
   private void ShowGameSummary(GameSession session)
   {
@@ -169,19 +179,26 @@ public class GameEngine
     Console.WriteLine($"📊 Final Score: {session.CurrentScore}/{session.NumberOfQuestions} ({percentage:F1}%)");
     Console.ResetColor();
 
-    DisplayPerformanceRating(percentage);
+    DisplayPerformanceRating(percentage, session.Difficulty);
     DisplayGameReview(session.GameLog);
   }
 
-  private void DisplayPerformanceRating(double percentage)
+  private void DisplayPerformanceRating(double percentage, DifficultyLevel difficulty)
   {
+    var thresholds = difficulty switch
+    {
+      DifficultyLevel.Easy => (excellent: 95, great: 85, good: 75, fair: 65),
+      DifficultyLevel.Moderate => (excellent: 90, great: 80, good: 70, fair: 60),
+      DifficultyLevel.Hard => (excellent: 85, great: 75, good: 65, fair: 55),
+      _ => (excellent: 90, great: 80, good: 70, fair: 60)
+    };
+
     var (rating, color) = percentage switch
     {
-      >= 90 => ("🏆 Excellent! Outstanding Work!", ConsoleColor.Yellow),
-      >= 80 => ("🥇 Great job! Very good performance!", ConsoleColor.Green),
-      >= 70 => ("🥈 Very Good! You did well!", ConsoleColor.Cyan),
-      >= 65 => ("🥉 Good! Keep working hard!", ConsoleColor.Blue),
-      >= 60 => ("🎉 Not bad! Room for improvement!", ConsoleColor.Magenta),
+      var p when p >= thresholds.excellent => ("🏆 Excellent! Outstanding Work!", ConsoleColor.Yellow),
+      var p when p >= thresholds.great => ("🥇 Great job! Very good performance!", ConsoleColor.Green),
+      var p when p >= thresholds.good => ("🥈 Very Good! You did well!", ConsoleColor.Cyan),
+      var p when p >= thresholds.fair => ("🥉 Good! Keep working hard!", ConsoleColor.Blue),
       _ => ("📚 Keep practicing! You'll get better!", ConsoleColor.Red)
     };
 
@@ -253,8 +270,8 @@ public class GameEngine
     Console.WriteLine();
 
     Console.ForegroundColor = ConsoleColor.Gray;
-    Console.WriteLine("Date & Time          | Operation       | Score    | Accuracy");
-    Console.WriteLine(new string('─', 80));
+    Console.WriteLine("Date & Time          | Operation    | Difficulty | Score | Accuracy");
+    Console.WriteLine(new string('─', 85));
     Console.ResetColor();
 
     foreach (var game in gameHistory)
@@ -263,7 +280,7 @@ public class GameEngine
     }
 
     Console.ForegroundColor = ConsoleColor.Gray;
-    Console.WriteLine(new string('─', 80));
+    Console.WriteLine(new string('─', 85));
     Console.ResetColor();
   }
 
@@ -278,12 +295,15 @@ public class GameEngine
 
     int totalQuestions = gameHistory.Sum(g => g.QuestionsAsked);
     int totalCorrect = gameHistory.Sum(g => g.Score);
+
     var operationCounts = new Dictionary<string, int>();
+    var difficultyCounts = new Dictionary<DifficultyLevel, int>();
 
     foreach (var game in gameHistory)
     {
       string opKey = game.Operation ?? "Unknown";
       operationCounts[opKey] = operationCounts.GetValueOrDefault(opKey, 0) + 1;
+      difficultyCounts[game.Difficulty] = difficultyCounts.GetValueOrDefault(game.Difficulty, 0) + 1;
     }
 
     double overallAccuracy = totalQuestions > 0 ? (double)totalCorrect / totalQuestions * 100 : 0;
@@ -297,6 +317,23 @@ public class GameEngine
     {
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine($"    - {kvp.Key}: {kvp.Value} games");
+    }
+
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine("  • Games by Difficulty:");
+    Console.ResetColor();
+
+    foreach (var kvp in difficultyCounts.OrderBy(x => x.Key))
+    {
+      string icon = kvp.Key switch
+      {
+        DifficultyLevel.Easy => "🟢",
+        DifficultyLevel.Moderate => "🟡",
+        DifficultyLevel.Hard => "🔴",
+        _ => "⚪"
+      };
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine($"    - {icon} {kvp.Key}: {kvp.Value} games");
     }
     Console.ResetColor();
   }

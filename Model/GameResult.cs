@@ -8,11 +8,20 @@ public class GameResult
   public string? Operation { get; set; }
   public int Score { get; set; }
   public int QuestionsAsked { get; set; }
+  public DifficultyLevel Difficulty { get; set; }
   public double Accuracy => QuestionsAsked > 0 ? (double)Score / QuestionsAsked * 100 : 0;
 
   public override string ToString()
   {
-    return $"{Date:MM-dd-yyyy HH:mm:ss} | {Operation,-15} | Score: {Score,2}/{QuestionsAsked,-2} | {Accuracy:F1%}";
+    string difficultyIcon = Difficulty switch
+    {
+      DifficultyLevel.Easy => "🟢",
+      DifficultyLevel.Moderate => "🟡",
+      DifficultyLevel.Hard => "🔴",
+      _ => "⚪"
+    };
+
+    return $"{Date:MM-dd-yyyy HH:mm} | {Operation,-12} | {difficultyIcon} {Difficulty,-8} | {Score,2}/{QuestionsAsked,-2} | {Accuracy:F1}%";
   }
 }
 
@@ -22,8 +31,9 @@ public class GameSession
   public char OperatorSymbol { get; set; }
   public int NumberOfQuestions { get; set; }
   public int CurrentScore { get; set; }
-  public List<string> GameLog { get; set; } = [];
+  public List<string> GameLog { get; set; } = new List<string>();
   public ConsoleColor ThemeColor { get; set; }
+  public DifficultyLevel Difficulty { get; set; }
 }
 
 public enum GameOperation
@@ -33,5 +43,13 @@ public enum GameOperation
   Multiplication = 3,
   Division = 4,
   History = 5,
-  Quit = 6
+  ChangeUsername = 6,
+  Quit = 7
+}
+
+public enum DifficultyLevel
+{
+  Easy = 1,
+  Moderate = 2,
+  Hard = 3
 }
