@@ -414,7 +414,8 @@ advanced features already in planning stages.
 - **Enhanced Animations**: Advanced console graphics and visual effects
 - **Theme Customization**: User-selectable visual themes and color schemes
 - **Accessibility Features**: Enhanced support for diverse user needs
-- **Mobile Compatibility**: Cross-platform console application support
+- **Mobile Compatibility**: Cross-platform console application support (.Net
+  MAUI)
 
 ---
 

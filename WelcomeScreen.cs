@@ -36,7 +36,7 @@ public class WelcomeScreen
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine("║                                  🧮 MATH GAME 🧮                        ║");
     Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("║                                 ✨ Dev Edition ✨                       ║");
+    Console.WriteLine("║                                 ✨ Version 2.0 ✨                       ║");
     Console.ForegroundColor = ConsoleColor.Magenta;
     Console.WriteLine("║                                                                        ║");
     Console.WriteLine("╚════════════════════════════════════════════════════════════════════════╝");

@@ -50,7 +50,7 @@ public class UserManager
     }
 
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"\n✅ Nice to meet you, {username}!");
+    Console.WriteLine($"\n✅ Nice to meet you, {username.Trim().ToUpper()}!");
     Console.ResetColor();
     Console.WriteLine("Press any key to continue...");
     Console.ReadKey(true);
